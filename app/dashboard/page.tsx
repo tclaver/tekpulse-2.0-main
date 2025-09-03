@@ -223,34 +223,78 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>
-              Frequently used features for easy access
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Button variant="outline" className="h-auto flex-col py-4">
-                <BookOpen className="h-6 w-6 mb-2" />
-                <span className="text-sm">Course Registration</span>
-              </Button>
-              <Button variant="outline" className="h-auto flex-col py-4">
-                <DollarSign className="h-6 w-6 mb-2" />
-                <span className="text-sm">Pay Fees</span>
-              </Button>
-              <Button variant="outline" className="h-auto flex-col py-4">
-                <Users className="h-6 w-6 mb-2" />
-                <span className="text-sm">Study Groups</span>
-              </Button>
-              <Button variant="outline" className="h-auto flex-col py-4">
-                <MapPin className="h-6 w-6 mb-2" />
-                <span className="text-sm">Campus Services</span>
-              </Button>
+        <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-green-50 dark:from-slate-800 dark:to-slate-900">
+  <CardHeader>
+    <CardTitle className="flex items-center text-xl">
+      <div className="p-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 mr-3">
+        <Sparkles className="h-5 w-5 text-white" />
+      </div>
+      Quick Actions
+    </CardTitle>
+    <CardDescription className="text-base">
+      Frequently used features for easy access
+    </CardDescription>
+  </CardHeader>
+  <CardContent>
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {[
+        { 
+          icon: BookOpen, 
+          label: 'Course Registration', 
+          gradient: 'from-blue-500 to-cyan-500',
+          href: 'https://apps.knust.edu.gh/students' 
+        },
+        { 
+          icon: DollarSign, 
+          label: 'Pay Fees', 
+          gradient: 'from-green-500 to-emerald-500',
+          href: 'https://pay.knust.edu.gh/' 
+        },
+        { 
+          icon: Users, 
+          label: 'Study Groups', 
+          gradient: 'from-purple-500 to-pink-500' 
+        },
+        { 
+          icon: MapPin, 
+          label: 'Campus Services', 
+          gradient: 'from-orange-500 to-red-500' 
+        }
+      ].map((action) => {
+        const Icon = action.icon;
+        return action.href ? (
+          <a 
+            key={action.label} 
+            href={action.href} 
+            target="_blank" 
+            rel="noopener noreferrer"
+          >
+            <Button 
+              variant="outline" 
+              className="h-auto flex-col py-6 w-full border-0 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm hover:shadow-lg transition-all duration-200 hover:scale-105 group"
+            >
+              <div className={`p-3 rounded-xl bg-gradient-to-r ${action.gradient} mb-3 group-hover:scale-110 transition-transform`}>
+                <Icon className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-sm font-medium">{action.label}</span>
+            </Button>
+          </a>
+        ) : (
+          <Button 
+            key={action.label}
+            variant="outline" 
+            className="h-auto flex-col py-6 border-0 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm hover:shadow-lg transition-all duration-200 hover:scale-105 group"
+          >
+            <div className={`p-3 rounded-xl bg-gradient-to-r ${action.gradient} mb-3 group-hover:scale-110 transition-transform`}>
+              <Icon className="h-6 w-6 text-white" />
             </div>
-          </CardContent>
-        </Card>
+            <span className="text-sm font-medium">{action.label}</span>
+          </Button>
+        );
+      })}
+    </div>
+  </CardContent>
+</Card>
       </div>
     </ProtectedLayout>
   );
