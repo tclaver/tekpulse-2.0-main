@@ -3,10 +3,16 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import PostCard from "@/components/PostCard";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 export default function BookmarksPage() {
   const [bookmarks, setBookmarks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Share dialog state
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
 
   // Fetch Bookmarks
   const fetchBookmarks = async () => {
@@ -47,7 +53,7 @@ export default function BookmarksPage() {
 
     const posts = data?.map((b: any) => ({
       ...b.posts,
-      isBookmarked: true, // always bookmarked here
+      isBookmarked: true,
     }));
 
     setBookmarks(posts || []);
@@ -62,7 +68,6 @@ export default function BookmarksPage() {
 
     if (!user) return;
 
-    // remove bookmark
     await supabase
       .from("bookmarks")
       .delete()
@@ -70,6 +75,14 @@ export default function BookmarksPage() {
       .eq("user_id", user.id);
 
     setBookmarks((prev) => prev.filter((p) => p.id !== postId));
+  };
+
+  // Share handler
+  const handleShare = (post: any) => {
+    if (typeof window !== "undefined") {
+      setShareUrl(`${window.location.origin}/posts/${post.id}`);
+    }
+    setShareOpen(true);
   };
 
   useEffect(() => {
@@ -87,10 +100,59 @@ export default function BookmarksPage() {
         <PostCard
           key={post.id}
           post={post}
-          onBookmarkToggle={handleBookmark} // allow unbookmark
-          showActions={true} // ensures icons appear like posts page
+          onBookmarkToggle={handleBookmark}
+          onShare={handleShare}
+          showActions={true}
         />
       ))}
+
+      {/* Share Dialog */}
+      <Dialog open={shareOpen} onOpenChange={setShareOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share this post</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Button
+              className="w-full"
+              onClick={() => {
+                navigator.clipboard.writeText(shareUrl);
+                alert("Link copied to clipboard!");
+                setShareOpen(false);
+              }}
+            >
+              Copy Link
+            </Button>
+            <Button
+              className="w-full"
+              onClick={() =>
+                window.open(`https://twitter.com/intent/tweet?url=${shareUrl}`, "_blank")
+              }
+            >
+              Share on Twitter
+            </Button>
+            <Button
+              className="w-full"
+              onClick={() =>
+                window.open(`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`, "_blank")
+              }
+            >
+              Share on Facebook
+            </Button>
+            <Button
+              className="w-full"
+              onClick={() =>
+                window.open(
+                  `https://api.whatsapp.com/send?text=${encodeURIComponent(shareUrl)}`,
+                  "_blank"
+                )
+              }
+            >
+              Share on WhatsApp
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
