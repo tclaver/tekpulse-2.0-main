@@ -9,8 +9,6 @@ import { Button } from "@/components/ui/button";
 export default function BookmarksPage() {
   const [bookmarks, setBookmarks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Share dialog state
   const [shareOpen, setShareOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
 
@@ -90,69 +88,74 @@ export default function BookmarksPage() {
   }, []);
 
   if (loading) return <p className="p-4">Loading bookmarks...</p>;
-
   if (bookmarks.length === 0)
     return <p className="p-4">You don’t have any bookmarks yet.</p>;
 
   return (
-    <div className="p-4 grid gap-4">
-      {bookmarks.map((post) => (
-        <PostCard
-          key={post.id}
-          post={post}
-          onBookmarkToggle={handleBookmark}
-          onShare={handleShare}
-          showActions={true}
-        />
-      ))}
+    <div className="min-h-screen bg-[#f7f9fa] dark:bg-slate-900">
+      <div className="max-w-7xl mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-6 text-center">Your Bookmarked Posts</h1>
+        {/* Responsive 3x3 grid (3 columns on md+ screens) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+          {bookmarks.slice(0, 9).map((post) => (
+            <PostCard
+              key={post.id}
+              post={post}
+              onBookmarkToggle={handleBookmark}
+              onShare={handleShare}
+              showActions={true}
+            />
+          ))}
+        </div>
 
-      {/* Share Dialog */}
-      <Dialog open={shareOpen} onOpenChange={setShareOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Share this post</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-2">
-            <Button
-              className="w-full"
-              onClick={() => {
-                navigator.clipboard.writeText(shareUrl);
-                alert("Link copied to clipboard!");
-                setShareOpen(false);
-              }}
-            >
-              Copy Link
-            </Button>
-            <Button
-              className="w-full"
-              onClick={() =>
-                window.open(`https://twitter.com/intent/tweet?url=${shareUrl}`, "_blank")
-              }
-            >
-              Share on Twitter
-            </Button>
-            <Button
-              className="w-full"
-              onClick={() =>
-                window.open(`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`, "_blank")
-              }
-            >
-              Share on Facebook
-            </Button>
-            <Button
-              className="w-full"
-              onClick={() =>
-                window.open(
-                  `https://api.whatsapp.com/send?text=${encodeURIComponent(shareUrl)}`,
-                  "_blank"
-                )
-              }
-            >
-              Share on WhatsApp
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+        {/* Share Dialog */}
+        <Dialog open={shareOpen} onOpenChange={setShareOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Share this post</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Button
+                className="w-full"
+                onClick={() => {
+                  navigator.clipboard.writeText(shareUrl);
+                  alert("Link copied to clipboard!");
+                  setShareOpen(false);
+                }}
+              >
+                Copy Link
+              </Button>
+              <Button
+                className="w-full"
+                onClick={() =>
+                  window.open(`https://twitter.com/intent/tweet?url=${shareUrl}`, "_blank")
+                }
+              >
+                Share on Twitter
+              </Button>
+              <Button
+                className="w-full"
+                onClick={() =>
+                  window.open(`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`, "_blank")
+                }
+              >
+                Share on Facebook
+              </Button>
+              <Button
+                className="w-full"
+                onClick={() =>
+                  window.open(
+                    `https://api.whatsapp.com/send?text=${encodeURIComponent(shareUrl)}`,
+                    "_blank"
+                  )
+                }
+              >
+                Share on WhatsApp
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }
