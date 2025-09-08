@@ -8,45 +8,71 @@ export default function BookmarksPage() {
   const [bookmarks, setBookmarks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchBookmarks = async () => {
-      setLoading(true);
+  // Fetch Bookmarks
+  const fetchBookmarks = async () => {
+    setLoading(true);
 
-      // ✅ Get session instead of getUser
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-      if (error || !session?.user) {
-        setBookmarks([]);
-        setLoading(false);
-        return;
-      }
-
-      const user = session.user;
-
-      // fetch posts joined with bookmarks
-      const { data, error: bookmarksError } = await supabase
-        .from("bookmarks")
-        .select("id, posts(*)")
-        .eq("user_id", user.id);
-
-      if (bookmarksError) {
-        console.error("Error fetching bookmarks:", bookmarksError.message);
-        setLoading(false);
-        return;
-      }
-
-      const posts = data?.map((b: any) => ({
-        ...b.posts,
-        isBookmarked: true,
-      }));
-
-      setBookmarks(posts || []);
+    if (!user) {
+      setBookmarks([]);
       setLoading(false);
-    };
+      return;
+    }
 
+    const { data, error } = await supabase
+      .from("bookmarks")
+      .select(`
+        id,
+        posts(
+          *,
+          author:profiles(
+            id,
+            full_name,
+            profile_pic,
+            student_id
+          )
+        )
+      `)
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching bookmarks:", error.message);
+      setLoading(false);
+      return;
+    }
+
+    const posts = data?.map((b: any) => ({
+      ...b.posts,
+      isBookmarked: true, // always bookmarked here
+    }));
+
+    setBookmarks(posts || []);
+    setLoading(false);
+  };
+
+  // Unbookmark handler
+  const handleBookmark = async (postId: string) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return;
+
+    // remove bookmark
+    await supabase
+      .from("bookmarks")
+      .delete()
+      .eq("post_id", postId)
+      .eq("user_id", user.id);
+
+    setBookmarks((prev) => prev.filter((p) => p.id !== postId));
+  };
+
+  useEffect(() => {
     fetchBookmarks();
   }, []);
 
@@ -58,7 +84,12 @@ export default function BookmarksPage() {
   return (
     <div className="p-4 grid gap-4">
       {bookmarks.map((post) => (
-        <PostCard key={post.id} post={post} />
+        <PostCard
+          key={post.id}
+          post={post}
+          onBookmarkToggle={handleBookmark} // allow unbookmark
+          showActions={true} // ensures icons appear like posts page
+        />
       ))}
     </div>
   );
