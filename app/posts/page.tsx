@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import supabase from "@/lib/supabase";
+import { supabase } from "@/lib/supabaseClient";
 import moment from "moment";
 
 import {
@@ -53,6 +53,7 @@ import { cn } from "@/lib/utils";
 
 export default function PostsPage() {
   const router = useRouter();
+  const [viewImageUrl, setViewImageUrl] = useState<string | null>(null);
   const [posts, setPosts] = useState<any>([]);
   const [comments, setComments] = useState<any>([]);
   const [newPost, setNewPost] = useState("");
@@ -464,6 +465,7 @@ const getPosts = async () => {
 
 
 
+
   const PostCard = ({ post }: { post: any }) => (
     <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
       <CardContent className="p-6">
@@ -483,6 +485,7 @@ const getPosts = async () => {
                 </AvatarFallback>
               )}
             </Avatar>
+            
             <div>
               <div className="flex items-center space-x-2 mb-1">
                 <h4 className="font-bold text-lg">{post.author?.full_name}</h4>
@@ -580,10 +583,12 @@ const getPosts = async () => {
             <img
               src={post.image_url}
               alt="Post image"
-              className="w-full max-h-96 object-cover hover:scale-105 transition-transform duration-300"
+              className="w-full max-h-96 object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
+              onClick={() => setViewImageUrl(post.image_url)}
             />
           </div>
         )}
+
 
         {/* Event Card */}
         {post.event && (
@@ -999,14 +1004,30 @@ const getPosts = async () => {
               <div className="space-y-4">
                 {posts?.map((post: any) => (
                  <PostCard
-  key={post.id}
-  post={post}
-  onBookmarkToggle={handleBookmark} // ✅ correct
-/>
+                  key={post.id}
+                  post={post}
+                  onBookmarkToggle={handleBookmark} // ✅ correct
+                />
 
 
                 ))}
               </div>
+                {/* Image Viewing*/}
+
+                 {/* Image Viewer Dialog */}
+        <Dialog open={!!viewImageUrl} onOpenChange={() => setViewImageUrl(null)}>
+          <DialogContent className="p-0 max-w-2xl flex items-center justify-center bg-transparent shadow-none">
+            {viewImageUrl && (
+              <img
+                src={viewImageUrl}
+                alt="Full View"
+                className="rounded-xl max-h-[80vh] w-auto object-contain mx-auto"
+                onClick={() => setViewImageUrl(null)}
+                style={{ cursor: "zoom-out" }}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
 
               {/* Load More */}
               {hasMorePosts && (
